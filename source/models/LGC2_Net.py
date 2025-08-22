@@ -1,12 +1,9 @@
-from re import A
-from keras import backend as K
-from tensorflow.python.keras.layers.pooling import GlobalAveragePooling1D
-from keras.layers import Layer
-from keras.layers import Reshape, GlobalMaxPool1D, Dense, add, Activation, multiply, Lambda, Conv1D, concatenate
+# -*- coding: utf-8 -*-
 import tensorflow as tf
+from keras import backend as K
+from keras.layers import GlobalMaxPool1D, Activation, Conv1D, concatenate
+from keras.layers import Layer
 
-
-# tf.config.experimental_run_functions_eagerly(True)
 
 class GIIF_module(Layer):
     def __init__(self, **kwargs):
@@ -170,18 +167,6 @@ def group_convolution_block(layer, **params):
     return out
 
 
-def add_conv_layers(layer, **params):
-    for subsample_length in params["conv_subsample_lengths"]:
-        layer = add_conv_weight(
-            layer,
-            params["conv_filter_length"],
-            params["conv_num_filters_start"],
-            subsample_length=subsample_length,
-            **params)
-        layer = _bn_relu(layer, **params)
-    return layer
-
-
 def resnet_block(
         layer,
         num_filters,
@@ -191,7 +176,6 @@ def resnet_block(
     from keras.layers import Add
     from keras.layers import MaxPooling1D
     from keras.layers.core import Lambda
-    from keras.layers import LSTM
 
     def zeropad(x):
         y = K.zeros_like(x)
@@ -234,7 +218,6 @@ def res2net_block_v2(
     from keras.layers import Add
     from keras.layers import MaxPooling1D
     from keras.layers.core import Lambda
-    from keras.layers import LSTM
 
     def zeropad(x):
         y = K.zeros_like(x)
@@ -285,7 +268,7 @@ def get_num_filters_at_index(index, num_start_filters, **params):
 
 
 def region_aware_two(ECG_previous_layer, PCG_previous_layer, **params):
-    from keras.layers import GlobalAveragePooling1D, Reshape, GlobalMaxPool1D, Dense, add, Activation, multiply, Lambda, Conv1D, concatenate, Reshape
+    from keras.layers import Activation, multiply, Conv1D, concatenate, Reshape
     ECG_PCG_layer_concat = concatenate([ECG_previous_layer, PCG_previous_layer], axis=-1)
     channel = ECG_PCG_layer_concat.shape[-1]
     weight_feature = Conv1D(filters=channel / 8, kernel_size=1, strides=1, padding='same', kernel_initializer='he_normal')(ECG_PCG_layer_concat)
@@ -307,7 +290,7 @@ def region_aware_two(ECG_previous_layer, PCG_previous_layer, **params):
 
 
 def channel_attention(ECG_previous_layer, PCG_previous_layer):
-    from keras.layers import GlobalAveragePooling1D, Reshape, GlobalMaxPool1D, Dense, add, Activation, multiply, concatenate
+    from keras.layers import GlobalAveragePooling1D, GlobalMaxPool1D, Dense, add, Activation, concatenate
     ECG_PCG_layer_concat = concatenate([ECG_previous_layer, PCG_previous_layer], axis=-1)
     channel = ECG_PCG_layer_concat.shape[-1]
     Dense_one = Dense(channel // 8, kernel_initializer='he_normal', activation='relu')
@@ -339,7 +322,7 @@ def channel_attention(ECG_previous_layer, PCG_previous_layer):
 
 
 def stem_structure(layer, **params):
-    from keras.layers import LSTM, concatenate, Bidirectional
+    from keras.layers import LSTM, concatenate
     layer_conv = add_conv_weight(
         layer,
         params["conv_filter_length"],
@@ -370,22 +353,9 @@ def stem_structure(layer, **params):
     return layer
 
 
-def LDA(index, Aggregation_feature, Feature_list, **params):
-    from keras.layers import Add, Activation, multiply, UpSampling1D
-    weight_map = Feature_list[index + 2]
-    if Aggregation_feature.shape[1] != weight_map.shape[1]:
-        upsampling_size = (Aggregation_feature.shape[1]) // (weight_map.shape[1])
-        weight_map = UpSampling1D(size=upsampling_size)(weight_map)  # 上采样以合并不同level特征
-    weight_map = add_conv_weight(weight_map, 1, 1, subsample_length=1, **params)
-    weight_map = Activation('softmax')(weight_map)
-    weighted_aggregation_feature = multiply([Aggregation_feature, weight_map])
-    Aggregation_feature = Add()([Aggregation_feature, weighted_aggregation_feature])
-    return Aggregation_feature
-
-
 def dense_fusion_model(ECG_feature_list, PCG_feature_list, **params):
     import numpy as np
-    from keras.layers import LSTM, concatenate, Bidirectional, MaxPooling1D, Add
+    from keras.layers import concatenate, MaxPooling1D, Add
     ECG_previous_layer = ECG_feature_list[0]
     PCG_previous_layer = PCG_feature_list[0]
     # ECG_previous_layer = LDA(-1,ECG_previous_layer,ECG_feature_list,**params)
@@ -493,8 +463,6 @@ def channel_share_model(channel_share_input, **params):
 
 def add_output_layer(ECG_PCG_layer, final_layer_name=None, **params):
     from keras.layers.core import Dense, Activation
-    from keras.layers.wrappers import TimeDistributed
-    from keras.layers import LSTM
 
     # ECG_PCG_layer = LSTM(units=64,return_sequences=True)(ECG_PCG_layer)
     # ECG_PCG_layer = LSTM(units=32,return_sequences=False)(ECG_PCG_layer)
@@ -544,7 +512,6 @@ def add_compile(model, **params):
 def LGC2_Net(**params):
     from keras.models import Model
     from keras.layers import Input, concatenate
-    import numpy as np
     # 搭建ECG特定模态编码器
     inp_ECG = Input(shape=(2560, 1), name='ECG_backbone_input')
     ECG_feature_list = []
