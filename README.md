@@ -14,6 +14,8 @@ This is the official implementation of:
 
 **Download:** The in-house dataset for HFrEF detection used in this study is released on [FigShare](). Please unzip the dataset into `LGC2_Net_HFrEF/dataset`.
 
+**Preprocessing:** The preprocessing steps including resampling (at 2000 Hz), normalization (mean-std), and band-pass filtering (25~400 Hz, PCG only). Code is presented in `LGC2_Net_HFrEF/source/data/load_data.py`.
+
 ## Environment Setup
 
 1. Please create a virtual environment with `python==3.7.10`
