@@ -8,11 +8,11 @@ This is the official implementation of:
 
 **Architecture:** The architecture of the model is implemented in `LGC2_Net_HFrEF/source/models/LGC2_Net.py`.
 
-**Pre-trained Models:** To use our pre-trained models, please download model checkpoints from [Zenodo](), and unzip them into `LGC2_Net_HFrEF/model_checkpoints`.
+**Pre-trained Models:** To use our pre-trained models, please download model checkpoints from [Zenodo](https://doi.org/10.5281/zenodo.16934977), and unzip them into `LGC2_Net_HFrEF/model_checkpoints`.
 
 ## In-house dataset
 
-**Download:** The in-house dataset for HFrEF detection used in this study is released on [FigShare](). Please unzip the dataset into `LGC2_Net_HFrEF/dataset`.
+**Download:** The in-house dataset for HFrEF detection used in this study is released on [Zenodo](https://doi.org/10.5281/zenodo.16934966). Please unzip the dataset into `LGC2_Net_HFrEF/dataset`.
 
 **Preprocessing:** The preprocessing steps including resampling (at 2000 Hz), normalization (mean-std), and band-pass filtering (25~400 Hz, PCG only). Code is presented in `LGC2_Net_HFrEF/source/data/load_data.py`.
 
